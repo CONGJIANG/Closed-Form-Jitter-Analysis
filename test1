@@ -1,0 +1,72 @@
+clear;
+clc;
+%input the pre and post data. 
+load('train_pre.mat');      %pre
+load('train_post-14.mat');  %postA
+delta=20000; %choose for interval length
+
+%partition for the posterior cell ie target
+L_ref = length(pre);
+t0_ref = pre(1);
+tf_ref = pre(1)+delta;
+number = ceil((pre(L_ref)-pre(1))/delta);
+
+k = 1;
+count_ref = zeros(1,number);
+for i=1:number
+    while (pre(k) >= t0_ref && pre(k) < tf_ref)
+        count_ref(i) = count_ref(i)+1;
+        k = k+1;
+        if k > L_ref
+            break;
+        end
+    end
+    t0_ref = tf_ref;
+    tf_ref = t0_ref+delta;
+end
+
+%partition for the posterior cell ie target
+L = length(postA);
+t0 = postA(1);
+tf = postA(1)+delta;
+number = ceil((postA(L)-postA(1))/delta);
+
+j = 1;
+count_tar = zeros(1,number);
+for i=1:number
+    while (postA(j) >= t0 && postA(j) < tf)
+        count_tar(i) = count_tar(i)+1;
+        j = j+1;
+        if j > L
+            break;
+        end
+    end
+    t0 = tf;
+    tf = t0+delta;
+end
+length(count_ref)
+length(count_tar)
+
+%%
+save DATA.mat 
+b = [count_ref',count_tar(:,1:length(count_ref))']
+
+colors = [1,0,0;0,1,0;0,0,1;0,1,1]
+del = 4;
+rangeX = range(count_ref)/del;
+rangeY = range(count_tar(:,1:length(count_ref)))./del;
+targ = count_tar(:,1:length(count_ref))
+for ii = 1:del
+xr = rangeX*ii;
+XR = rangeX*(ii + 1);
+yr = rangeY*ii;
+YR = rangeY*(ii + 1);
+temp1 = count_ref(count_ref > xr & count_ref < XR);
+temp2 = targ(targ > yr & targ < YR);
+
+figure('color','w')
+h=scatter(temp1,temp2,40,'MarkerFaceColor',colors(ii,:),'MarkerEdgeColor',colors(ii,:),'marker','*'); hold on
+xlabel('reference (num of spikes/window)');
+ylabel('target (num of spikes/window)');
+end
+get(h);
