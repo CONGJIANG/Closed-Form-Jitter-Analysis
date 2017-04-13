@@ -1,0 +1,18 @@
+X = double(rand(1,1e3) < .2);
+Y = double(rand(1,1e3) < .2);
+X_sp = find(X==1)./1000; % type 1000 if you want it in %milliseconds
+Y_sp = find(Y==1)./1000;
+
+stRound = round(X_sp.*1000);
+binnedTimes = zeros(1,1000);
+binnedTimes (stRound ) = 1;
+
+ [C,LAGS] = xcorr(X,Y,'unbiased'); 
+%  biased'   - scales the raw cross-correlation by 1/M.
+%       'unbiased' - scales the raw correlation by 1/(M-abs(lags)).
+%       'coeff'    - normalizes the sequence so that the auto-correlations
+%                    at zero lag are identically 1.0.
+%       'none'  
+%  
+ figure('color','w')
+ area(LAGS,C); hold on 
