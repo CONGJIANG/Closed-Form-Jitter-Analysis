@@ -1,0 +1,16 @@
+% write code to convolue two prob dists
+
+p = [1/2,1/2];
+x = [0,1];
+k = [0:1:2];  %last number is Number of variables
+
+pro = zeros(1,length(k));
+
+for k = 0:1:2
+    for x =0:1
+    x1 = binopdf(x,1,p(1));
+    x2 = binopdf(k-x,1,p(2));
+    pro(k+1) = pro(k+1) + x1 .* x2;
+    end
+end
+pro
