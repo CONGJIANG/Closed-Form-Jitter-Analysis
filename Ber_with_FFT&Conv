@@ -1,0 +1,25 @@
+% write code to convolue two prob dists
+%% Bernoulli with convolution
+coin = [1/2,1/2]
+new = coin;
+figure('color','w')
+for i = 1:100
+new = conv(new,coin);
+subplot(2,1,1)
+plot(0:length(new)-1,new);
+title('CONV:# of trails')
+xlim([1,100])
+end
+% Bernoulli with FFT
+N = 100;
+COINS = repmat(coin,[N,1])
+clear freqCoin timeCoin
+for i = 1:size(COINS,1)
+freqCoin(i,:) = fft(COINS(i,:),N)./(N);
+end
+timeCoin = ifft(prod(freqCoin),(N));
+timeCoin = timeCoin./sum(timeCoin);
+subplot(2,1,2)
+plot(timeCoin)
+title('FFT:# of trails')
+xlim([1,100])
