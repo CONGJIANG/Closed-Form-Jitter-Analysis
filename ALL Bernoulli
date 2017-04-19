@@ -1,0 +1,54 @@
+%% Each coin IS a random variable. We want to know compound outcomes
+N = 100;
+COINS = repmat(coin,[N,1]);
+
+%% Bernoulli with convolution
+% If we want to combine N random variable, we do N -1 convolutions...
+% meaning that if we do them in a loop, for n = 1:N-1.
+a = [1/2,1/2];
+b = [1/2,1/2];
+c = [1/2,1/2];
+d = [1/2,1/2];
+e = [1/2,1/2];
+
+z = conv(a,b)
+y = conv(z,c)
+x = conv(y,d)
+w = conv(x,e)
+%%
+coin = [1/2,1/2]
+nee = coin;
+for i = 1:(5-1)
+    nee = conv(nee,coin);
+end
+figure('color','w')
+subplot(2,1,1); plot(0:numel(nee)-1,nee); hold on; axis square;
+xlim([0,4]); ylim([0,1])
+%
+
+% Bernoulli with FFT
+
+clear freqCoin timeCoin
+fcoin = COINS(1:5,:);
+NP = 6;
+for i = 1:size(fcoin,1)
+freqCoin(i,:) = fft(fcoin(i,:),NP);
+end
+timeCoin = ifft(prod(freqCoin),(NP));
+%timeCoin = timeCoin./sum(timeCoin);
+subplot(2,1,2); plot(0:numel(timeCoin)-1,timeCoin); axis square;
+xlim([0,4]); ylim([0,1])
+
+%%
+
+
+c = [1/2,1/2];
+NP = 6; % this has to equal the number of outcomes
+
+fC = fft(c,NP);
+b = fC.^5
+
+timeCoin = ifft(b,(NP));
+%timeCoin = timeCoin./sum(timeCoin);
+plot(0:numel(timeCoin)-1,timeCoin); axis square;
+%xlim([0,4]); ylim([0,1])
