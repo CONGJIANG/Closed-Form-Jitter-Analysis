@@ -1,0 +1,104 @@
+%% Step 1: Generate two random spike trains.
+firing1=100 %20; % neuron 1 firing in Hz
+firing2=100 %20;
+end_time=1; % end time 1 second
+small_delta=.03; % for synchrony (in seconds)
+synch_range=[0 1];
+
+total_jitters=500;
+total_trials=50000;
+big_delta=.02; % for delta-coursening in interval jitter
+u=rand(total_trials,1);
+
+rate1=1/firing1;
+X=[ exprnd(rate1) ];
+while X(end)<end_time, X(end+1)=X(end)+exprnd(rate1); end
+X=X(1:end-1);
+    
+rate2=1/firing2;
+Y=[ exprnd(rate2) ];
+while Y(end)<end_time, Y(end+1)=Y(end)+exprnd(rate2); end
+Y=Y(1:end-1);
+
+%X = 1
+%Y = 2
+%% Step 2: Make the spikes times discrete binary vectors.
+
+% make containers with one millisecond bins.
+milliBins = 1e3; % how do you want to discretize time?
+Xd = zeros(1,milliBins);
+Yd = zeros(1,milliBins);
+ind1 = round(X*milliBins); ind1(ind1==0) =[];
+ind2 = round(Y*milliBins); ind2(ind2==0) =[];
+Xd(ind1) = 1;
+Yd(ind2) = 1;
+
+% delta is the length of the window
+% j indexes the window number.
+
+delta = 10;
+J = milliBins./delta;
+%% Count the number of coincidences and get N(Y,j) and N(X,j)
+XdMat = reshape(Xd,[J,delta]);
+YdMat = reshape(Yd,[J,delta]);
+
+for j = 1:size(XdMat,1)
+    coincid(j) = numel(intersect(find(XdMat(j,:)==1),find(YdMat(j,:)==1)));
+end
+
+%
+NY = sum(YdMat,2);
+NX = sum(XdMat,2);
+P = zeros(J,delta);
+
+%% Find Cmax.
+
+Xmax = sum(NX);
+Ymax = sum(NY);
+if Xmax < Ymax
+    Cmax = Xmax;
+else
+    Cmax = Ymax;
+end
+%% Find unique N(Y,j) and N(X,j) pairs and in the third column of uniNxny put
+% the number of times each unique pair occurs.
+nxny = horzcat(NX,NY);
+uniNxny = unique(nxny,'rows');
+uniNxny = horzcat(uniNxny,zeros(1,length(uniNxny))');
+
+for i = 1:size(uniNxny,1)
+    r = find(ismember(nxny,uniNxny(i,1:2),'rows'))
+    uniNxny(i,3) = numel(r);
+end
+%% Make a TABLE based on the observed values.
+clear PCINT
+TABLE = pcinttab()
+for i = 1:size(uniNxny,1)
+    for c = 1:11
+    PCINT(i,c) = TABLE(c,uniNxny(i,1)+1,uniNxny(i,2)+1);
+    end
+end
+%% Get the spectra.
+
+clc
+clear spectra
+for i = 1:size(PCINT,1)
+    spectra(i,:) = (fft(PCINT(i,:),Cmax)).^uniNxny(i,3);
+end
+%% I am a little confused what to do with the value "zero" in the frequency domain,
+% because if you have a interval with no spikes, all the probabilities will
+% be zeros, therefore all the frequency components will be zero, and when
+% you multiple together all the spectra everything will become zero...
+% which is obviously NOT what we want.
+kill = sum(abs(spectra),2)
+r = find(kill == 0)
+spectra(r,:) = []
+spectra = prod(spectra);
+
+%% Take the ifft and renormalize
+final = ifft(spectra,Cmax);
+final = final./sum(final);
+%
+%% plot it.
+figure('color','w')
+plot(final(1:1e3)); axis square
