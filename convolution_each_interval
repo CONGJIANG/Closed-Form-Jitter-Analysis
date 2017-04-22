@@ -1,0 +1,27 @@
+clear all
+[ TABLE ] = jitterTable( 10 )
+%% This makes all the seperate interval probability distribution from the TABLE and puts them
+% into the rows of the matrix invDis.
+delta = 10
+for j = 1:100
+    for c = 1:delta+1
+invDis(j,c) = TABLE(NY(j)+1,NX(j)+1,c);
+    end
+end
+%% Now use the convolution method.
+if sum(NX)<sum(NY)
+    Cmax = sum(NX)
+else
+    Cmax = sum(NY)
+end
+
+a = invDis(1,:);
+for j = 2:100
+    a = conv(a,invDis(j,:));
+end
+figure('color','w')
+plot(a(1:Cmax)) % make a plot with fourier next to this and see if it looks the same.
+
+%% Now implement the Fourier method.
+nxnyPairs = [NX,NY];
+unique(nxnyPairs,'rows')
