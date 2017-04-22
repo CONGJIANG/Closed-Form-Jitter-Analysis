@@ -1,0 +1,36 @@
+function [ TABLE ] = jitterTable( delta )
+%This function computes a table of possible p-values for the intervals in
+%two spikes trains, P(Cint|N(X,j),N(X,j),delta). If there are any problems
+% or concerns you may have please contact Cong Jiang
+% (cjiang080892@gmail.com).
+%   For a probablity you want, P(Cint|N(X,j),N(X,j),delta), enter into the
+%   function jitterTable( delta ) and in the output "TABLE" imput
+%   TABLE(NY+1,NX+1,C+1).
+
+% C can be values between 0-delta. preallocate possible C's
+C = zeros(delta+1,delta+1,delta+1);
+for i = 1:delta+1
+   C(:,:,i) = i-1;
+end
+
+% NX(j) can be values 0 to delta
+NX = repmat(0:delta,[delta+1,1]);
+NX = repmat(NX,[1,1,delta+1]);
+
+% NY(j) can be values 0 to delta
+NY = imrotate(NX,-90); % try to change
+
+% Now compute the p-values for each possible combination.
+Pvals = zeros(delta+1,delta+1,delta+1);
+for i = 1:delta+1
+    for j = 1:delta+1
+        for k = 1:delta+1
+            top1 = znck(delta-NY(i,j,k),NX(i,j,k)-C(i,j,k));
+            top2 = znck(NY(i,j,k),C(i,j,k));
+            bot = znck(delta,NX(i,j,k));
+            Pvals(i,j,k) = (top1.*top2)./bot;
+        end
+    end
+end
+TABLE = Pvals;
+end
