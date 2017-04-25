@@ -1,0 +1,67 @@
+clear all
+[ TABLE ] = jitterTable( 10 )
+%% This makes all the seperate interval probability distribution from the TABLE and puts them
+% into the rows of the matrix invDis.
+delta = 10
+for j = 1:100
+    for c = 1:delta+1
+invDis(j,c) = TABLE(NY(j)+1,NX(j)+1,c);
+    end
+end
+%% Now use the convolution method.
+if sum(NX)<sum(NY)
+    Cmax = sum(NX)
+else
+    Cmax = sum(NY)
+end
+
+a = invDis(1,:);
+for j = 2:100
+    a = conv(a,invDis(j,:));
+end
+figure('color','w')
+plot(a(1:Cmax)) % make a plot with fourier next to this and see if it looks the same.
+
+
+%% Find unique N(Y,j) and N(X,j) pairs and in the third column of uniNxny put
+% the number of times each unique pair occurs.
+nxnyPairs = [NX,NY];
+uniNxny = unique(nxnyPairs,'rows');
+uniNxny = horzcat(uniNxny,zeros(1,length(uniNxny))');
+
+for i = 1:size(uniNxny,1)
+    r = find(ismember(nxny,uniNxny(i,1:2),'rows'))
+    uniNxny(i,3) = numel(r);
+end
+%% Make a TABLE based on the observed values.
+clear PCINT
+[ TABLE ] = jitterTable( 10 )
+for i = 1:size(uniNxny,1)
+    for c = 1:11
+    PCINT(i,c) = TABLE(c,uniNxny(i,1)+1,uniNxny(i,2)+1);
+    end
+end
+%% Get the spectra.
+
+clc
+clear spectra
+for i = 1:size(PCINT,1)
+    spectra(i,:) = (fft(PCINT(i,:),Cmax)).^uniNxny(i,3);
+end
+%% I am a little confused what to do with the value "zero" in the frequency domain,
+% because if you have a interval with no spikes, all the probabilities will
+% be zeros, therefore all the frequency components will be zero, and when
+% you multiple together all the spectra everything will become zero...
+% which is obviously NOT what we want.
+kill = sum(abs(spectra),2)
+r = find(kill == 0)
+spectra(r,:) = []
+spectra = prod(spectra);
+
+%% Take the ifft and renormalize
+final = ifft(spectra,Cmax);
+final = final./sum(final);
+%
+%% plot it.
+figure('color','w')
+plot(final(1:1e3)); axis square
