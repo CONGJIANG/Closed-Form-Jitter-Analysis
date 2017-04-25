@@ -37,7 +37,7 @@ for i = 1:size(uniNxny,1)
     r = find(ismember(nxny,uniNxny(i,1:2),'rows'))
     uniNxny(i,3) = numel(r);
 end
-%% Make a TABLE based on the observed values.
+%% Using the TABLE based on the observed values.
 clear PCINT
 [ TABLE ] = jitterTable( 10 )
 for i = 1:size(uniNxny,1)
