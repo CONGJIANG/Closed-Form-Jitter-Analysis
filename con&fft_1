@@ -1,3 +1,7 @@
+%% This part is mainly about using TABLE function to convolve for each interval. IE. invDis(j,c)
+%% Also, we will ues FFT to convolve distribution.  Compare result and efficience. 
+
+
 clear all
 [ TABLE ] = jitterTable( 10 )
 %% This makes all the seperate interval probability distribution from the TABLE and puts them
