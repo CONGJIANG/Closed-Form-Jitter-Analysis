@@ -1,0 +1,11 @@
+function [ p ] = znck( N,K )
+%UNTITLED5 Summary of this function goes here
+%   Detailed explanation goes here
+%   This function actually is changed "choose" function
+if  0<=K && 0<=N && K<=N
+   p = nchoosek(N,K);
+else
+p = 0;
+end
+
+end
