@@ -1,8 +1,8 @@
 function [ TABLE ] = jitterTable( delta )
-%This function computes a table of possible p-values for the intervals in
+%This function computes a table of possible prob-values for the intervals in
 %two spikes trains, P(Cint|N(X,j),N(X,j),delta). If there are any problems
-% or concerns you may have please contact Cong Jiang
-% (cjiang080892@gmail.com).
+% or concerns you may have please contact Cong Jiang(cjiang080892@gmail.com).
+%   This part is corresponding to Niebur's (Closed Form Jitter Analysis)3.1.2 (Three dimensional table of all possible valuse of P)
 %   For a probablity you want, P(Cint|N(X,j),N(X,j),delta), enter into the
 %   function jitterTable( delta ) and in the output "TABLE" imput
 %   TABLE(NY+1,NX+1,C+1).
